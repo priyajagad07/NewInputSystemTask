@@ -5,13 +5,12 @@ public class ItemSpawner : MonoBehaviour
     public GameObject[] items;
     public int numberofItems;
 
-    public float minX = -5f;
-    public float maxX = 5f;
-
-    public float minY = -1f;
+    public float minX = -0.9f;
+    public float maxX = 0.4f;
+    public float minY = 1f;
     public float maxY = 1f;
-    public float minZ = -5f;
-    public float maxZ = 5f;
+    public float minZ = -0.21f;
+    public float maxZ = 1.2f;
 
     void Start()
     {
@@ -33,3 +32,5 @@ public class ItemSpawner : MonoBehaviour
         Instantiate(items[RandomItem], SpawnPos, Quaternion.identity);
     }
 }
+
+
