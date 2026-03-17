@@ -1,41 +1,52 @@
 using UnityEngine;
+
 public class DragObject : MonoBehaviour
 {
+    private InputManager inputManager;
+
     private DraggableItem currentItem;
     private Plane dragPlane;
     private Vector3 offset;
+
     public float dragSpeed = 5f;
 
-    void Update()
+    void Start()
     {
-        //pick item
-        if (Input.GetMouseButtonDown(0))
+        inputManager = InputManager.Instance;
+
+        inputManager.onMousePress.AddListener(PickItem);
+        inputManager.onMouseRelease.AddListener(ReleaseItem);
+    }
+
+    void PickItem()
+    {
+        Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+
+        if (Physics.Raycast(ray, out RaycastHit hit))
         {
-            Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+            currentItem = hit.collider.GetComponent<DraggableItem>();
 
-            if (Physics.Raycast(ray, out RaycastHit hit))
+            if (currentItem != null)
             {
-                currentItem = hit.collider.GetComponent<DraggableItem>();
+                Debug.Log("Picked item");
+                dragPlane = new Plane(Vector3.up, hit.point);
+                offset = hit.collider.transform.position - hit.point;
 
-                if (currentItem != null)
-                {
-                    dragPlane = new Plane(Vector3.up, hit.point);
-                    offset = hit.collider.transform.position - hit.point;
-
-                    currentItem.StartDrag();
-                }
+                currentItem.StartDrag();
             }
         }
+    }
 
-        //release item
-        if (Input.GetMouseButtonUp(0) && currentItem != null)
+    void ReleaseItem()
+    {
+        if (currentItem != null)
         {
             currentItem.EndDrag();
             currentItem = null;
         }
     }
 
-    void FixedUpdate()
+    void Update()
     {
         if (currentItem != null)
         {
@@ -46,7 +57,12 @@ public class DragObject : MonoBehaviour
                 Vector3 point = ray.GetPoint(enter);
 
                 Vector3 targetPos = point + offset;
-                Vector3 smoothPos = Vector3.Lerp(currentItem.transform.position, targetPos, dragSpeed * Time.deltaTime);
+
+                Vector3 smoothPos = Vector3.Lerp(
+                    currentItem.transform.position,
+                    targetPos,
+                    dragSpeed * Time.deltaTime
+                );
 
                 currentItem.DragItem(smoothPos);
             }

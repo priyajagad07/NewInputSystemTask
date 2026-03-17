@@ -1,15 +1,21 @@
 using UnityEngine;
+using UnityEngine.InputSystem;
 
 public class DustbinTrigger : MonoBehaviour
 {
-    private void OnTriggerEnter(Collider other)
+    private void OnTriggerStay(Collider other)
     {
         DraggableItem item = other.GetComponent<DraggableItem>();
 
-        if (item != null)
+        if(item != null && Mouse.current.leftButton.wasReleasedThisFrame)
         {
+            GameManager gm = GameManager.Instance;
+            gm.AddScore();
+
             item.Dispose();
             Debug.Log("Item disposed");
+
+            ItemSpawner.instance.SpawnItem();
         }
     }
 }

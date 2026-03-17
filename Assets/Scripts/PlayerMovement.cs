@@ -1,51 +1,56 @@
 using UnityEngine;
-using UnityEngine.InputSystem;
 
 public class PlayerMovement : MonoBehaviour
 {
-    private SessionInput sessionInput;
     private CharacterController characterController;
-    public float speed = 0.5f;
+    private InputManager inputManager;
+    public float speed = 2f;
     public float rotationSpeed = 120f;
     public Vector2 moveInput;
-
-    public bool rotateLeft;
-    public bool rotateRight;
-
-    public void Awake()
+    bool rotateLeft;
+    bool rotateRight;
+    public float jumpHeight = 1f;
+    public float gravity = -9.81f;
+    private float yVelocity;
+    void Start()
     {
         characterController = GetComponent<CharacterController>();
-        sessionInput = new SessionInput();
+        inputManager = InputManager.Instance;
 
+        inputManager.onMove.AddListener(SetMove);
+        inputManager.onRotateLeftStart.AddListener(() => rotateLeft = true);
+        inputManager.onRotateLeftStop.AddListener(() => rotateLeft = false);
+
+        inputManager.onRotateRightStart.AddListener(() => rotateRight = true);
+        inputManager.onRotateRightStop.AddListener(() => rotateRight = false);
+        inputManager.onJump.AddListener(Jump);
     }
-    private void OnEnable()
+
+    void SetMove(Vector2 move)
     {
-        sessionInput.Enable();
-
-        sessionInput.Player.Move.performed += (move) =>
-        {
-            moveInput = move.ReadValue<Vector2>();
-        };
-
-        sessionInput.Player.Move.canceled += (move) =>
-        {
-            moveInput = Vector2.zero;
-        };
-
-        sessionInput.Player.RotateLeft.started += rleft => rotateLeft = true;
-        sessionInput.Player.RotateLeft.canceled += rleft => rotateLeft = false;
-
-        sessionInput.Player.RotateRight.started += rright => rotateRight = true;
-        sessionInput.Player.RotateRight.canceled += rright => rotateRight = false;
+        moveInput = move;
     }
-    private void OnDisable()
+
+    void Jump()
     {
-        sessionInput.Disable();
+        if (characterController.isGrounded)
+        {
+            yVelocity = Mathf.Sqrt(jumpHeight * -2f * gravity);
+        }
     }
-    
+
     void Update()
     {
         Vector3 move = transform.right * moveInput.x + transform.forward * moveInput.y;
+
+        if (characterController.isGrounded && yVelocity < 0)
+        {
+            yVelocity = -2f;
+        }
+
+        yVelocity += gravity * Time.deltaTime;
+
+        move.y = yVelocity;
         characterController.Move(move * speed * Time.deltaTime);
 
         if (rotateLeft)

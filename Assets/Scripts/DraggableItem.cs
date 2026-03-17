@@ -32,6 +32,6 @@ public class DraggableItem : MonoBehaviour
     //remove item in dustbin
     public void Dispose()
     {
-        Destroy(gameObject, 0.5f);
+        Destroy(gameObject, 0.1f);
     }
 }

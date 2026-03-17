@@ -12,6 +12,19 @@ public class ItemSpawner : MonoBehaviour
     public float minZ = -0.21f;
     public float maxZ = 1.2f;
 
+    public static ItemSpawner instance;
+
+    void Awake()
+    {
+        if(instance == null)
+        {
+            instance = this;
+        }
+        else
+        {
+            Destroy(gameObject);
+        }
+    }
     void Start()
     {
         for (int i = 0; i < numberofItems; i++)
@@ -20,7 +33,7 @@ public class ItemSpawner : MonoBehaviour
         }
     }
 
-    void SpawnItem()
+    public void SpawnItem()
     {
         float randomX = Random.Range(minX, maxX);
         float randomY = Random.Range(minY, maxY);
